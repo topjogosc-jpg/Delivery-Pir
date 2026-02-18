@@ -6,9 +6,10 @@ interface LandingPageProps {
   onEnterAsPartner: () => void;
   onRegisterPartner: () => void;
   onDownloadClick: () => void;
+  onEnterDevRoot?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsPartner, onRegisterPartner, onDownloadClick }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsPartner, onRegisterPartner, onDownloadClick, onEnterDevRoot }) => {
   const [copied, setCopied] = useState(false);
   const whatsappNumber = "5519991759068";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá! Gostaria de suporte sobre o Delivery Pira Certo.`;
@@ -172,9 +173,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
         </div>
       </a>
 
-      {/* Minimal Footer */}
+      {/* Minimal Footer with Hidden Dev Trigger */}
       <footer className="py-12 px-6 border-t border-gray-50 text-center">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em]">
+        <p 
+          className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] cursor-default"
+          onClick={onEnterDevRoot}
+        >
           &copy; {new Date().getFullYear()} Delivery Pira Certo • Todos os direitos reservados
         </p>
       </footer>

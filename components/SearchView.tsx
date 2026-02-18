@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { getFoodRecommendations } from '../services/geminiService';
-import { Restaurant } from '../types';
+import { getFoodRecommendations } from '../services/geminiService.ts';
+import { Restaurant } from '../services/types.ts';
 
 interface SearchViewProps {
   restaurants: Restaurant[];

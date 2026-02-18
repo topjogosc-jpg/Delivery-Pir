@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Restaurant } from '../services/types.ts';
+import { Restaurant } from '../types';
 
 interface SellerRegistrationProps {
   onRegister: (restaurant: Restaurant) => void;

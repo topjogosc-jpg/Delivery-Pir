@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Order, Restaurant } from '../types';
+import { Order, Restaurant } from '../services/types.ts';
 
 interface SellerDashboardProps {
   orders: Order[];

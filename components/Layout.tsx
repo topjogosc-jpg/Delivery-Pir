@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View } from './services/types.ts';
+import { View } from '../services/types.ts';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -111,7 +111,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setView, cartCoun
       </main>
 
       {/* Mobile Bottom Nav */}
-      {/* Fix: Added type assertion to activeView to resolve the reported unintentional comparison error */}
       {(role === 'customer' || !role) && (activeView as string) !== 'register' && (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 flex justify-between items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.03)]">
           <button 

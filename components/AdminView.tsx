@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Restaurant, FoodItem, PaymentConfig } from './services/types.ts';
+import { Restaurant, FoodItem, PaymentConfig } from '../services/types.ts';
 
 interface AdminViewProps {
   restaurants: Restaurant[];

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Order } from '../types';
+import { Order } from '../services/types.ts';
 
 interface OrderTrackingProps {
   status: Order['status'];

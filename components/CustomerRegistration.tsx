@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CustomerInfo } from '../types';
+import { CustomerInfo } from '../services/types.ts';
 
 interface CustomerRegistrationProps {
   onSave: (info: CustomerInfo) => void;

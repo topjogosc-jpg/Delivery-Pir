@@ -1,49 +1,42 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App.tsx';
 
-/**
- * Função para configurar notificações push e Service Worker
- */
 const setupNotifications = async () => {
   if (!('serviceWorker' in navigator)) {
-    console.log('Service Worker não suportado neste navegador.');
     return;
   }
 
   try {
-    // Registra o Service Worker
-    const registration = await navigator.serviceWorker.register('./sw.js', {
+    // Determine the path to the service worker relative to the current location
+    // to avoid origin mismatch errors in proxied environments
+    const swPath = new URL('./sw.js', import.meta.url).pathname;
+    
+    const registration = await navigator.serviceWorker.register(swPath, {
       scope: '/',
     });
-    console.log('Service Worker registrado com sucesso:', registration);
-
-    // Solicita permissão para notificações
+    
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        console.log('Permissão de notificação concedida!');
-      } else {
-        console.warn('Permissão de notificação negada pelo usuário.');
+        console.log('Delivery Pira: Notificações Ativas');
       }
     }
   } catch (error) {
-    console.error('Erro ao configurar Service Worker/Notificações:', error);
+    // Log the error but don't break the app as SW is an enhancement
+    console.warn('Service Worker registration skipped or failed:', error);
   }
 };
 
-// Inicia a configuração
 setupNotifications();
 
 const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Não foi possível encontrar o elemento root para montar o app");
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
 }
-
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);

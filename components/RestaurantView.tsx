@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Restaurant, FoodItem } from '../types';
+import React, { useState } from 'react';
+import { Restaurant, FoodItem, Review } from '../services/types.ts';
 
 interface RestaurantViewProps {
   restaurant: Restaurant;
@@ -8,13 +8,31 @@ interface RestaurantViewProps {
   onAddToCart: (item: FoodItem) => void;
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
+  onAddReview: (restaurantId: string, review: Omit<Review, 'id' | 'date' | 'userName'>) => void;
+  userName?: string;
 }
 
-const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onAddToCart, isFavorite, onToggleFavorite }) => {
+const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onAddToCart, isFavorite, onToggleFavorite, onAddReview, userName }) => {
   const isStoreOpen = restaurant.isOpen !== false;
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [hoverRating, setHoverRating] = useState(0);
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rating === 0) {
+      alert("Por favor, selecione uma nota de 1 a 5 estrelas.");
+      return;
+    }
+    onAddReview(restaurant.id, { rating, comment });
+    setRating(0);
+    setComment('');
+    setShowReviewForm(false);
+  };
 
   return (
-    <div className="animate-slideIn">
+    <div className="animate-slideIn pb-20">
       <div className="flex items-center justify-between mb-6">
         <button onClick={onBack} className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors">
           <i className="fa-solid fa-chevron-left"></i>
@@ -29,7 +47,6 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
         </button>
       </div>
 
-      {/* Banner de Loja Fechada */}
       {!isStoreOpen && (
         <div className="bg-gray-900 text-white p-4 rounded-2xl mb-6 flex items-center justify-between animate-fadeIn shadow-lg border-l-4 border-red-500">
           <div className="flex items-center gap-3">
@@ -52,17 +69,14 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
             <div className="flex justify-between items-end">
               <div className="max-w-[70%]">
                 <h1 className="text-3xl font-bold leading-tight">{restaurant.name}</h1>
-                
-                {/* Endereço no Banner */}
                 <div className="flex items-start gap-1.5 mt-2 opacity-90">
                   <i className="fa-solid fa-location-dot text-[10px] mt-1 shrink-0"></i>
                   <p className="text-xs font-medium leading-relaxed">{restaurant.address || 'Endereço não informado'}</p>
                 </div>
-
                 <div className="flex items-center gap-3 text-sm mt-3 opacity-90">
                   <span className="flex items-center gap-1">
                     <i className="fa-solid fa-star text-yellow-400"></i>
-                    {restaurant.rating}
+                    {restaurant.rating.toFixed(1)}
                   </span>
                   <span>•</span>
                   <span>{restaurant.category}</span>
@@ -80,7 +94,6 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
       </div>
 
       <div className="space-y-8">
-        {/* Info Box sobre o Estacionamento/Endereço */}
         <section className="bg-white p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0">
              <i className="fa-solid fa-map-location-dot text-xl"></i>
@@ -96,7 +109,6 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {restaurant.menu.map(item => {
               const isAvailable = item.available !== false && isStoreOpen;
-              
               return (
                 <div key={item.id} className={`bg-white p-4 rounded-xl flex gap-4 border border-gray-100 transition-all ${(!isAvailable || !isStoreOpen) ? 'opacity-60 grayscale-[0.8]' : 'hover:shadow-sm'}`}>
                   <div className="flex-1">
@@ -135,9 +147,77 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
                 </div>
               );
             })}
-            {restaurant.menu.length === 0 && (
-              <div className="col-span-full py-12 text-center text-gray-400 italic bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
-                Cardápio em breve...
+          </div>
+        </section>
+
+        {/* Seção de Avaliações */}
+        <section className="pt-8 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black text-gray-800 flex items-center gap-2">
+              <i className="fa-solid fa-star text-yellow-400"></i>
+              Avaliações da Galera
+            </h2>
+            <button 
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="bg-red-50 text-red-500 px-4 py-2 rounded-xl text-xs font-black uppercase hover:bg-red-100 transition-all flex items-center gap-2"
+            >
+              <i className="fa-solid fa-pen-to-square"></i>
+              Avaliar Loja
+            </button>
+          </div>
+
+          {showReviewForm && (
+            <form onSubmit={handleSubmitReview} className="bg-gray-50 p-6 rounded-3xl border border-gray-100 mb-8 animate-fadeIn">
+              <h3 className="text-sm font-black text-gray-700 uppercase mb-4 tracking-widest">O que você achou desta loja?</h3>
+              <div className="flex gap-2 mb-6">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="text-2xl transition-all"
+                  >
+                    <i className={`fa-solid fa-star ${star <= (hoverRating || rating) ? 'text-yellow-400 scale-110' : 'text-gray-200'}`}></i>
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Conte para a gente sua experiência..."
+                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-red-500/10 transition-all resize-none h-24 mb-4"
+              />
+              <div className="flex gap-3">
+                <button type="submit" className="flex-1 bg-[#EA1D2C] text-white py-3 rounded-2xl font-black text-xs uppercase shadow-lg shadow-red-100 hover:bg-red-600 transition-all">Enviar Avaliação</button>
+                <button type="button" onClick={() => setShowReviewForm(false)} className="flex-1 bg-white border border-gray-100 text-gray-400 py-3 rounded-2xl font-black text-xs uppercase hover:bg-gray-50 transition-all">Cancelar</button>
+              </div>
+            </form>
+          )}
+
+          <div className="space-y-4">
+            {restaurant.reviews && restaurant.reviews.length > 0 ? (
+              restaurant.reviews.slice().reverse().map(review => (
+                <div key={review.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm animate-fadeIn">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm text-gray-800">{review.userName}</span>
+                      <div className="flex gap-0.5 mt-0.5">
+                        {[1, 2, 3, 4, 5].map(s => (
+                          <i key={s} className={`fa-solid fa-star text-[10px] ${s <= review.rating ? 'text-yellow-400' : 'text-gray-100'}`}></i>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-300 uppercase">{review.date}</span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed italic">"{review.comment || 'Não deixou comentário.'}"</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-10 bg-gray-50/50 rounded-[2rem] border border-dashed border-gray-200 text-gray-400 space-y-2">
+                 <i className="fa-solid fa-star-half-stroke text-2xl opacity-20"></i>
+                 <p className="text-xs font-medium italic">Ninguém avaliou ainda. Seja o primeiro!</p>
               </div>
             )}
           </div>

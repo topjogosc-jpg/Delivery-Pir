@@ -1,21 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
-import Layout from './components/Layout';
-import HomeView from './components/HomeView';
-import SearchView from './components/SearchView';
-import RestaurantView from './components/RestaurantView';
-import CartDrawer from './components/CartDrawer';
-import LoginModal from './components/LoginModal';
-import AdminView from './components/AdminView';
-import SellerDashboard from './components/SellerDashboard';
-import SellerRegistration from './components/SellerRegistration';
-import OrderTracking from './components/OrderTracking';
-import CustomerRegistration from './components/CustomerRegistration';
-import LandingPage from './components/LandingPage';
-import DownloadModal from './components/DownloadModal';
-import RegisterView from './components/RegisterView';
-import { View, Restaurant, FoodItem, CartItem, Order, UserRole, PaymentMethod, CustomerInfo } from './types';
-import { MOCK_RESTAURANTS } from './constants';
+import Layout from './components/Layout.tsx';
+import HomeView from './components/HomeView.tsx';
+import SearchView from './components/SearchView.tsx';
+import RestaurantView from './components/RestaurantView.tsx';
+import CartDrawer from './components/CartDrawer.tsx';
+import LoginModal from './components/LoginModal.tsx';
+import AdminView from './components/AdminView.tsx';
+import SellerDashboard from './components/SellerDashboard.tsx';
+import SellerRegistration from './components/SellerRegistration.tsx';
+import OrderTracking from './components/OrderTracking.tsx';
+import CustomerRegistration from './components/CustomerRegistration.tsx';
+import LandingPage from './components/LandingPage.tsx';
+import DownloadModal from './components/DownloadModal.tsx';
+import RegisterView from './components/RegisterView.tsx';
+import DevAdminView from './components/DevAdminView.tsx';
+import { View, Restaurant, FoodItem, CartItem, Order, UserRole, PaymentMethod, CustomerInfo, Review } from './services/types.ts';
+import { MOCK_RESTAURANTS } from './constants.tsx';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<UserRole>(() => {
@@ -126,6 +127,29 @@ const App: React.FC = () => {
     });
   };
 
+  const handleAddReview = (restaurantId: string, reviewData: Omit<Review, 'id' | 'date' | 'userName'>) => {
+    const newReview: Review = {
+      id: Math.random().toString(36).substr(2, 9),
+      userName: customerInfo?.name || 'Visitante',
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+      date: new Date().toLocaleDateString('pt-BR')
+    };
+
+    setRestaurants(prev => prev.map(res => {
+      if (res.id === restaurantId) {
+        const reviews = [...(res.reviews || []), newReview];
+        const averageRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+        return {
+          ...res,
+          reviews,
+          rating: averageRating
+        };
+      }
+      return res;
+    }));
+  };
+
   const handleSaveCustomerInfo = (info: CustomerInfo) => {
     setCustomerInfo(info);
     setRole('customer');
@@ -217,7 +241,6 @@ const App: React.FC = () => {
     setIsCartOpen(false);
     setCurrentView('orders');
 
-    // Notificação de Pedido Realizado
     sendAppNotification('Pedido Confirmado!', `Seu pedido #${orderId} foi enviado para ${firstItem.restaurantName}.`);
 
     if (method === 'pix' && restaurant?.paymentConfig?.whatsappPix) {
@@ -297,6 +320,16 @@ const App: React.FC = () => {
     localStorage.removeItem('pira_session_selected_res');
   };
 
+  // Função discreta para entrar no painel de dev
+  const handleEnterDevRoot = () => {
+    const pass = window.prompt('Acesso Root - Digite a senha de administrador:');
+    if (pass === '0382690') {
+      setCurrentView('dev-admin');
+    } else if (pass !== null) {
+      alert('Acesso negado.');
+    }
+  };
+
   if (!role && !hasEntered && currentView === 'home') {
     return (
       <>
@@ -305,6 +338,7 @@ const App: React.FC = () => {
           onEnterAsPartner={() => setShowLoginModal(true)}
           onRegisterPartner={() => setCurrentView('register')}
           onDownloadClick={() => setIsDownloadModalOpen(true)}
+          onEnterDevRoot={handleEnterDevRoot}
         />
         <DownloadModal 
           isOpen={isDownloadModalOpen} 
@@ -338,6 +372,14 @@ const App: React.FC = () => {
       onInstallClick={() => setIsDownloadModalOpen(true)}
     >
       <div className="pb-10 pt-4">
+        {currentView === 'dev-admin' && (
+          <DevAdminView 
+            restaurants={restaurants} 
+            setRestaurants={setRestaurants} 
+            onBack={() => setCurrentView('home')} 
+          />
+        )}
+
         {currentView === 'register' && !role && (
           <RegisterView 
             onSelectCustomer={() => setShowCustomerRegister(true)}
@@ -350,7 +392,7 @@ const App: React.FC = () => {
           />
         )}
 
-        {(role === 'customer' || !role) && currentView !== 'register' && (
+        {(role === 'customer' || !role) && currentView !== 'register' && currentView !== 'dev-admin' && (
           <>
             {customerInfo && (
               <div className="px-1 mb-6 flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm animate-fadeIn">
@@ -390,6 +432,8 @@ const App: React.FC = () => {
                 onAddToCart={addToCart} 
                 isFavorite={favorites.includes(currentRestaurant.id)}
                 onToggleFavorite={handleToggleFavorite}
+                onAddReview={handleAddReview}
+                userName={customerInfo?.name}
               />
             )}
             {currentView === 'orders' && (
@@ -438,7 +482,7 @@ const App: React.FC = () => {
           </>
         )}
 
-        {role === 'seller' && activeRestaurantId && (
+        {role === 'seller' && activeRestaurantId && currentView !== 'dev-admin' && (
           <>
             {currentView === 'seller-dashboard' && (
               <SellerDashboard 

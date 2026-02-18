@@ -1,5 +1,5 @@
 
-import { Restaurant } from './types';
+import { Restaurant } from './services/types.ts';
 
 export const COLORS = {
   primary: '#EA1D2C', // iFood Red

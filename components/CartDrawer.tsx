@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CartItem, PaymentMethod, Restaurant } from '../types';
+import { CartItem, PaymentMethod, Restaurant } from '../services/types.ts';
 
 interface CartDrawerProps {
   items: CartItem[];

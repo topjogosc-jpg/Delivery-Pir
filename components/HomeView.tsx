@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Restaurant } from '../types';
+import { Restaurant } from '../services/types.ts';
 
 interface HomeViewProps {
   restaurants: Restaurant[];

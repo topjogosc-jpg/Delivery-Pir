@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Restaurant, CustomerInfo } from '../types';
+import { Restaurant, CustomerInfo } from '../services/types.ts';
 
 interface LoginModalProps {
   restaurants: Restaurant[];

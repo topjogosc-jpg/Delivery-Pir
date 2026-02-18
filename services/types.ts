@@ -13,6 +13,14 @@ export interface FoodItem {
   available?: boolean;
 }
 
+export interface Review {
+  id: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface PaymentConfig {
   pixKey: string;
   whatsappPix: string;
@@ -40,6 +48,7 @@ export interface Restaurant {
   adminPin?: string;
   // Added to match registration form data
   ownerName?: string;
+  reviews?: Review[];
 }
 
 export interface CartItem extends FoodItem {
@@ -72,4 +81,4 @@ export interface Order {
   customerInfo: CustomerInfo;
 }
 
-export type View = 'home' | 'search' | 'orders' | 'profile' | 'restaurant' | 'register' | 'seller-dashboard' | 'admin';
+export type View = 'home' | 'search' | 'orders' | 'profile' | 'restaurant' | 'register' | 'seller-dashboard' | 'admin' | 'dev-admin';
