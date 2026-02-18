@@ -31,6 +31,10 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
     setShowReviewForm(false);
   };
 
+  const scrollToMenu = () => {
+    document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="animate-slideIn pb-20">
       <div className="flex items-center justify-between mb-6">
@@ -93,7 +97,17 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="flex flex-col gap-6">
+        {/* Botão de Atalho para o Cardápio */}
+        <button 
+          onClick={scrollToMenu}
+          className="w-full bg-white border-2 border-red-50 text-[#EA1D2C] py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-red-50 hover:border-red-100 transition-all flex items-center justify-center gap-3"
+        >
+          <i className="fa-solid fa-utensils"></i>
+          Ver Cardápio Completo
+          <i className="fa-solid fa-chevron-down animate-bounce"></i>
+        </button>
+
         <section className="bg-white p-5 rounded-2xl border border-gray-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0">
              <i className="fa-solid fa-map-location-dot text-xl"></i>
@@ -104,7 +118,7 @@ const RestaurantView: React.FC<RestaurantViewProps> = ({ restaurant, onBack, onA
           </div>
         </section>
 
-        <section>
+        <section id="menu-section" className="pt-4">
           <h2 className="text-xl font-bold mb-4">Cardápio</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {restaurant.menu.map(item => {

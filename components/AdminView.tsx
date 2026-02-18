@@ -25,7 +25,8 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
   const [storeInfo, setStoreInfo] = useState({
     name: targetRes?.name || '',
     address: targetRes?.address || '',
-    deliveryFee: targetRes?.deliveryFee?.toString() || '0'
+    deliveryFee: targetRes?.deliveryFee?.toString() || '0',
+    image: targetRes?.image || ''
   });
 
   const [newItem, setNewItem] = useState({
@@ -52,7 +53,13 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
     if (!targetRes) return;
     setRestaurants(prev => prev.map(r => 
       r.id === activeRestaurantId 
-      ? { ...r, name: storeInfo.name, address: storeInfo.address, deliveryFee: parseFloat(storeInfo.deliveryFee) || 0 } 
+      ? { 
+          ...r, 
+          name: storeInfo.name, 
+          address: storeInfo.address, 
+          deliveryFee: parseFloat(storeInfo.deliveryFee) || 0,
+          image: storeInfo.image 
+        } 
       : r
     ));
     alert('Informações da loja atualizadas!');
@@ -176,10 +183,22 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
               <i className="fa-solid fa-gears text-[#EA1D2C]"></i>
               Configurações Gerais
             </h3>
+
+            <div className="flex flex-col items-center gap-4 py-4 border-b border-gray-50">
+               <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-red-100 shadow-lg">
+                  <img src={storeInfo.image} className="w-full h-full object-cover" alt="Logo da loja" />
+               </div>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Preview da Imagem</p>
+            </div>
             
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nome da Empresa</label>
               <input type="text" value={storeInfo.name} onChange={e => setStoreInfo({...storeInfo, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none font-bold" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">URL da Imagem (Logo/Fachada)</label>
+              <input type="url" value={storeInfo.image} onChange={e => setStoreInfo({...storeInfo, image: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none text-sm" placeholder="https://..." />
             </div>
 
             <div className="space-y-2">
