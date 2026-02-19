@@ -7,8 +7,9 @@ const getEnv = (key: string) => {
   return String(val).trim();
 };
 
-const supabaseUrl = getEnv("VITE_SUPABASE_URL");
-const supabaseAnonKey = getEnv("VITE_SUPABASE_ANON_KEY");
+// Usando as credenciais fornecidas pelo usuário como padrão
+const supabaseUrl = getEnv("VITE_SUPABASE_URL") || "https://zlaogmxxrjaipogyzwrn.supabase.co";
+const supabaseAnonKey = getEnv("VITE_SUPABASE_ANON_KEY") || "sb_publishable_Hsw9xaSw7bMQWZ_SlwXpTA_bZp74SSR";
 
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 
@@ -17,7 +18,7 @@ export const supabase = isSupabaseConfigured
   : null;
 
 if (!isSupabaseConfigured) {
-  console.warn("⚠️ Supabase não configurado. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY nas variáveis de ambiente.");
+  console.warn("⚠️ Supabase não configurado corretamente.");
 } else {
-  console.log("%c✓ Delivery Pira: Supabase Conectado!", "color: #10b981; font-weight: bold;");
+  console.log("%c✓ Delivery Pira: Supabase Conectado (zlaogmxxrjaipogyzwrn)!", "color: #10b981; font-weight: bold;");
 }
