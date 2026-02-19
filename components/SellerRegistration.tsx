@@ -9,6 +9,7 @@ interface SellerRegistrationProps {
 
 const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onCancel }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [protocolInput, setProtocolInput] = useState('');
   const [formData, setFormData] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -23,6 +24,9 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
     deliveryFee: '0'
   });
 
+  const whatsappNumber = "5519991759068";
+  const protocolRequired = "0382690@";
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -36,6 +40,12 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (protocolInput !== protocolRequired) {
+      alert('Protocolo de Ativação incorreto. Solicite o código válido com o desenvolvedor via WhatsApp.');
+      return;
+    }
+
     if (formData.pin.length !== 4) {
       alert('O PIN deve ter exatamente 4 dígitos.');
       return;
@@ -71,12 +81,48 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
       <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-scaleIn my-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-2xl font-black text-gray-800 italic tracking-tighter">Seja um Parceiro Pira</h2>
           <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender em Pirapemas</p>
         </div>
 
+        {/* Aviso de Protocolo Requerido - Código Oculto */}
+        <div className="mb-6 bg-red-50 border border-red-100 p-5 rounded-2xl space-y-3 animate-fadeIn">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-shield-halved text-lg"></i>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-red-800 uppercase tracking-widest">Cadastro Restrito</p>
+              <p className="text-[11px] text-red-700 font-medium leading-tight">
+                O acesso para novos parceiros é limitado. Você precisa inserir o <strong>Protocolo de Ativação</strong> oficial para prosseguir.
+              </p>
+            </div>
+          </div>
+          <a 
+            href={`https://wa.me/${whatsappNumber}?text=Olá! Gostaria de solicitar o Protocolo de Ativação para cadastrar minha loja no Delivery Pira.`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-green-200"
+          >
+            <i className="fa-brands fa-whatsapp text-sm"></i>
+            Solicitar Protocolo via WhatsApp
+          </a>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-red-500 uppercase tracking-widest ml-1">Inserir Protocolo de Ativação</label>
+            <input 
+              required 
+              type="text" 
+              value={protocolInput} 
+              onChange={e => setProtocolInput(e.target.value)} 
+              className="w-full bg-red-50/30 border border-red-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/10 font-black text-center tracking-widest" 
+              placeholder="Digite o código de segurança..." 
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seu Nome</label>
@@ -120,27 +166,17 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <p className="text-[9px] text-gray-400 font-medium italic">Capture a fachada ou o logo da sua loja para atrair clientes.</p>
+                  <p className="text-[9px] text-gray-400 font-medium italic">Capture a fachada ou o logo da sua loja.</p>
                </div>
             </div>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-4">
-            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Configuração Financeira (Mercado Pago & Pix)</p>
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Configuração Financeira</p>
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500">Access Token Mercado Pago (Opcional)</label>
-                <input type="password" value={formData.mercadoPagoToken} onChange={e => setFormData({...formData, mercadoPagoToken: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="APP_USR-..." />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500">Chave Pix</label>
-                  <input type="text" value={formData.pixKey} onChange={e => setFormData({...formData, pixKey: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="CPF/Email/Telefone" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500">WhatsApp Comprovantes</label>
-                  <input type="tel" value={formData.whatsappPix} onChange={e => setFormData({...formData, whatsappPix: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="5599..." />
-                </div>
+                <label className="text-[10px] font-bold text-gray-500">Chave Pix</label>
+                <input type="text" value={formData.pixKey} onChange={e => setFormData({...formData, pixKey: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="CPF/Email/Telefone" />
               </div>
             </div>
           </div>
