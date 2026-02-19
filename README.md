@@ -1,27 +1,43 @@
 
-# 🚀 Delivery Pira - Configuração de Banco de Dados
+# 🚀 Guia de Ativação Online - Delivery Pira
 
-Para o aplicativo funcionar em todos os celulares salvando os dados, você deve configurar o Firebase:
+Para que seu app saia do "Modo Offline" e funcione em qualquer celular, siga estes 4 passos simples:
 
-### 1. Criar o Projeto no Firebase
-1. Acesse [console.firebase.google.com](https://console.firebase.google.com/).
-2. Clique em **"Adicionar Projeto"** e dê o nome de `Delivery Pira`.
-3. No menu lateral, vá em **Build > Firestore Database** e clique em **"Criar Banco de Dados"**.
-4. Escolha **"Iniciar no modo de teste"** (para que todos possam ler/escrever inicialmente) e escolha a região mais próxima (ex: `southamerica-east1`).
+### 1. Criar o Projeto no Firebase (O "Coração" do App)
+1. Acesse o [Console do Firebase](https://console.firebase.google.com/).
+2. Clique em **"Adicionar projeto"**.
+3. Nomeie como `Delivery Pira`.
+4. Pode desativar o Google Analytics se quiser rapidez, ou deixar ativado (tanto faz).
+5. Clique em **"Criar projeto"**.
 
-### 2. Obter as Chaves
-1. Vá na engrenagem ⚙️ (Configurações do Projeto).
-2. Na aba **"Geral"**, role até o fim e clique no ícone `< >` (Web App).
-3. Registre o app como `Delivery Pira Web`.
-4. Copie os valores do objeto `firebaseConfig`.
+### 2. Ativar o Banco de Dados (Onde ficam os pedidos)
+1. No menu à esquerda, clique em **Build** > **Firestore Database**.
+2. Clique em **"Criar banco de dados"**.
+3. Escolha **"Iniciar no modo de teste"** (Isso é importante para o app conseguir ler/escrever sem travas iniciais).
+4. Clique em **Próximo** e escolha a região `southamerica-east1` (São Paulo/Brasil).
+5. Clique em **Ativar**.
 
-### 3. Configurar na Vercel
-No painel da Vercel, adicione as seguintes variáveis de ambiente:
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
+### 3. Obter suas Chaves de Acesso
+1. Na engrenagem ⚙️ (ao lado de "Visão geral do projeto"), clique em **Configurações do projeto**.
+2. Na aba **Geral**, role até o final (seção "Seus aplicativos").
+3. Clique no ícone de código `</>` (Web).
+4. Apelide como `App Pira` e clique em **Registrar app**.
+5. O Firebase vai te mostrar um código com `apiKey`, `projectId`, etc. **Copie esses valores**.
 
-Pronto! Agora seu app está "vivo" e os pedidos serão salvos nas nuvens.
+### 4. Conectar ao App (Hospedagem)
+Se você estiver usando a **Vercel** ou **Netlify** para hospedar seu site:
+1. Vá nas configurações do seu projeto na Vercel (**Settings** > **Environment Variables**).
+2. Adicione cada uma destas chaves com os valores que você copiou:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+
+---
+
+### 📱 Como testar se funcionou?
+Abra o link do seu app no celular. Se a faixa amarela **"Modo Offline"** desaparecer, parabéns! Seu app agora é uma plataforma real de delivery.
+
+**Dúvidas?** Fale com o suporte no WhatsApp configurado na Landing Page!

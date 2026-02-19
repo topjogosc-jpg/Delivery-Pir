@@ -37,20 +37,18 @@ let db: Firestore | null = null;
 let isDbInitialized = false;
 
 try {
-  // Only initialize if we have a valid project ID
   if (firebaseConfig.projectId && firebaseConfig.projectId !== "undefined") {
     const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     db = getFirestore(app);
     isDbInitialized = true;
-    console.log("Firebase Pira: Banco de dados inicializado com sucesso.");
+    console.log("%c✓ Delivery Pira: Banco de dados conectado!", "color: green; font-weight: bold;");
   } else {
-    console.warn("Firebase Pira: Project ID ausente. O app funcionará em modo demonstração (Offline).");
+    console.warn("%c! Delivery Pira: Rodando em modo DEMO (Offline). Configure o VITE_FIREBASE_PROJECT_ID para ativar o banco real.", "color: orange;");
   }
 } catch (error) {
-  console.error("Firebase Pira: Erro ao inicializar Firestore:", error);
+  console.error("Erro ao inicializar Firebase:", error);
 }
 
-// Exportações para uso em toda a aplicação
 export { 
   db,
   isDbInitialized,
