@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Restaurant } from '../services/types.ts';
 
 interface SellerRegistrationProps {
@@ -8,6 +8,7 @@ interface SellerRegistrationProps {
 }
 
 const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onCancel }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -21,6 +22,17 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
     mercadoPagoToken: '',
     deliveryFee: '0'
   });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +91,38 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
           <div className="space-y-1">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nome da Empresa</label>
             <input required type="text" value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:outline-none font-bold" placeholder="Pira Lanches" />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logo da Loja</label>
+            <div className="flex gap-4 items-center">
+               <div className="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden shrink-0">
+                  {formData.image ? (
+                    <img src={formData.image} className="w-full h-full object-cover" alt="Preview" />
+                  ) : (
+                    <i className="fa-solid fa-store text-gray-200 text-2xl"></i>
+                  )}
+               </div>
+               <div className="flex-1 space-y-2">
+                  <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full bg-gray-900 text-white py-3 rounded-xl font-black text-xs uppercase shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <i className="fa-solid fa-camera"></i>
+                    Tirar Foto / Galeria
+                  </button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <p className="text-[9px] text-gray-400 font-medium italic">Capture a fachada ou o logo da sua loja para atrair clientes.</p>
+               </div>
+            </div>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-4">

@@ -2,6 +2,7 @@
   "name": "Delivery PIRAPEMAS ",
   "description": "Uma plataforma completa de delivery inspirada no iFood, com busca inteligente por IA, categorias de comida e checkout simplificado.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "camera"
   ]
 }

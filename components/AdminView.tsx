@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Restaurant, FoodItem, PaymentConfig } from '../services/types.ts';
 
 interface AdminViewProps {
@@ -11,6 +11,8 @@ interface AdminViewProps {
 
 const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBack, activeRestaurantId }) => {
   const targetRes = restaurants.find(r => r.id === activeRestaurantId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const storeLogoInputRef = useRef<HTMLInputElement>(null);
   
   const [activeTab, setActiveTab] = useState<'menu' | 'payments' | 'settings'>('menu');
   const [payConfig, setPayConfig] = useState<PaymentConfig>(targetRes?.paymentConfig || {
@@ -63,6 +65,22 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
       : r
     ));
     alert('Informações da loja atualizadas!');
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'product' | 'store') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        if (type === 'product') {
+          setNewItem({ ...newItem, image: base64String });
+        } else {
+          setStoreInfo({ ...storeInfo, image: base64String });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const savePaymentConfig = () => {
@@ -185,8 +203,29 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
             </h3>
 
             <div className="flex flex-col items-center gap-4 py-4 border-b border-gray-50">
-               <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-red-100 shadow-lg">
+               <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-red-100 shadow-lg relative group">
                   <img src={storeInfo.image} className="w-full h-full object-cover" alt="Logo da loja" />
+                  <button 
+                    onClick={() => storeLogoInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <i className="fa-solid fa-camera text-xl"></i>
+                  </button>
+               </div>
+               <input 
+                  type="file" 
+                  ref={storeLogoInputRef}
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, 'store')}
+                  className="hidden"
+               />
+               <div className="flex gap-2">
+                  <button 
+                    onClick={() => storeLogoInputRef.current?.click()}
+                    className="text-[9px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-500 transition-all"
+                  >
+                    <i className="fa-solid fa-upload mr-1"></i> Alterar Logo
+                  </button>
                </div>
                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Preview da Imagem</p>
             </div>
@@ -312,8 +351,39 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, setRestaurants, onBa
                   </div>
                 </div>
                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">URL da Imagem</label>
-                    <input type="url" value={newItem.image} onChange={e => setNewItem({...newItem, image: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none" placeholder="https://..." />
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Imagem do Produto</label>
+                    <div className="flex gap-2">
+                       <button 
+                         type="button"
+                         onClick={() => fileInputRef.current?.click()}
+                         className="flex-1 bg-gray-100 border border-gray-200 rounded-xl py-3 px-4 text-xs font-black uppercase text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center gap-2"
+                       >
+                         <i className="fa-solid fa-camera"></i>
+                         Tirar Foto / Galeria
+                       </button>
+                       <input 
+                         type="file" 
+                         ref={fileInputRef}
+                         accept="image/*"
+                         capture="environment"
+                         onChange={(e) => handleImageUpload(e, 'product')}
+                         className="hidden"
+                       />
+                    </div>
+                    {newItem.image && (
+                      <div className="mt-2 relative w-16 h-16 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                        <img src={newItem.image} className="w-full h-full object-cover" alt="Preview" />
+                        <button 
+                          type="button"
+                          onClick={() => setNewItem({...newItem, image: ''})}
+                          className="absolute top-0 right-0 bg-red-500 text-white w-4 h-4 flex items-center justify-center text-[8px]"
+                        >
+                          <i className="fa-solid fa-x"></i>
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-[9px] text-gray-400 mt-1 italic">Ou insira uma URL abaixo:</p>
+                    <input type="url" value={newItem.image.startsWith('data:') ? '' : newItem.image} onChange={e => setNewItem({...newItem, image: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs focus:outline-none" placeholder="https://..." />
                 </div>
                 <button type="submit" className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-black transition-all">Adicionar Produto</button>
               </div>
