@@ -13,7 +13,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
   const [copied, setCopied] = useState(false);
   const whatsappNumber = "5519991759068";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá! Gostaria de suporte sobre o Delivery Pira Certo.`;
-  const devEmail = "topjogosc@gmail.com";
+  const devEmail = "deliverypirapemas@gmail.com";
   
   const getAppUrl = () => {
     try {

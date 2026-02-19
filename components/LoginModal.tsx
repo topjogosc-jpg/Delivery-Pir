@@ -1,45 +1,67 @@
 
 import React, { useState } from 'react';
 import { Restaurant, CustomerInfo } from '../services/types.ts';
+import { db, collection, query, where, getDocs, limit } from '../services/firebase.ts';
 
 interface LoginModalProps {
-  restaurants: Restaurant[];
-  customerInfo: CustomerInfo | null;
   onLoginSuccess: (role: 'customer' | 'seller', data: Restaurant | CustomerInfo) => void;
   onCancel: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ restaurants, customerInfo, onLoginSuccess, onCancel }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess, onCancel }) => {
   const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsChecking(true);
+    setError(false);
     
-    // 1. Tenta logar como Lojista
-    const sellerRes = restaurants.find(r => 
-      r.ownerEmail?.toLowerCase() === email.toLowerCase() && 
-      r.adminPin === pin
-    );
-    
-    if (sellerRes) {
-      onLoginSuccess('seller', sellerRes);
-      return;
-    }
+    try {
+      // 1. Tenta buscar como Parceiro/Lojista
+      const sellerQuery = query(
+        collection(db, "restaurants"), 
+        where("ownerEmail", "==", email.toLowerCase().trim()), 
+        where("adminPin", "==", pin),
+        limit(1)
+      );
+      const sellerSnapshot = await getDocs(sellerQuery);
+      
+      if (!sellerSnapshot.empty) {
+        const sellerData = { id: sellerSnapshot.docs[0].id, ...sellerSnapshot.docs[0].data() } as Restaurant;
+        onLoginSuccess('seller', sellerData);
+        setIsChecking(false);
+        return;
+      }
 
-    // 2. Tenta logar como Cliente
-    if (customerInfo && 
-        customerInfo.email.toLowerCase() === email.toLowerCase() && 
-        customerInfo.pin === pin) {
-      onLoginSuccess('customer', customerInfo);
-      return;
-    }
+      // 2. Tenta buscar como Cliente
+      const customerQuery = query(
+        collection(db, "customers"), 
+        where("email", "==", email.toLowerCase().trim()), 
+        where("pin", "==", pin),
+        limit(1)
+      );
+      const customerSnapshot = await getDocs(customerQuery);
 
-    // Se não encontrar nenhum
-    setError(true);
-    setPin('');
-    setTimeout(() => setError(false), 2000);
+      if (!customerSnapshot.empty) {
+        const customerData = customerSnapshot.docs[0].data() as CustomerInfo;
+        onLoginSuccess('customer', customerData);
+        setIsChecking(false);
+        return;
+      }
+
+      // Se chegou aqui, não encontrou nada
+      setError(true);
+      setPin('');
+      setTimeout(() => setError(false), 3000);
+    } catch (err) {
+      console.error("Erro ao fazer login:", err);
+      alert("Erro de conexão. Verifique sua internet.");
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   return (
@@ -58,10 +80,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ restaurants, customerInfo, onLo
               <input 
                 required
                 type="email"
+                disabled={isChecking}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-sm font-medium"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-red-500/10 text-sm font-medium disabled:opacity-50"
               />
             </div>
 
@@ -71,10 +94,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ restaurants, customerInfo, onLo
                 required
                 type="password"
                 maxLength={4}
+                disabled={isChecking}
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                 placeholder="••••"
-                className={`w-full text-center text-3xl tracking-[0.5em] font-black py-4 border-2 rounded-2xl focus:outline-none transition-colors ${error ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:border-[#EA1D2C]'}`}
+                className={`w-full text-center text-3xl tracking-[0.5em] font-black py-4 border-2 rounded-2xl focus:outline-none transition-colors disabled:opacity-50 ${error ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:border-[#EA1D2C]'}`}
               />
             </div>
             
@@ -83,15 +107,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ restaurants, customerInfo, onLo
             <div className="grid grid-cols-1 gap-2 mt-6">
               <button 
                 type="submit"
-                disabled={pin.length < 4 || !email}
-                className="w-full py-4 text-sm font-black bg-[#EA1D2C] text-white rounded-2xl shadow-xl shadow-red-100 hover:bg-red-600 transition-all active:scale-95 disabled:opacity-50"
+                disabled={pin.length < 4 || !email || isChecking}
+                className="w-full py-4 text-sm font-black bg-[#EA1D2C] text-white rounded-2xl shadow-xl shadow-red-100 hover:bg-red-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Entrar
+                {isChecking ? (
+                  <>
+                    <i className="fa-solid fa-circle-notch animate-spin"></i>
+                    Verificando...
+                  </>
+                ) : 'Entrar'}
               </button>
               <button 
                 type="button"
+                disabled={isChecking}
                 onClick={onCancel}
-                className="w-full py-3 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                className="w-full py-3 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
               >
                 Cancelar
               </button>

@@ -47,7 +47,7 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
       name: formData.businessName,
       address: formData.businessAddress,
       ownerName: formData.ownerName,
-      ownerEmail: formData.ownerEmail,
+      ownerEmail: formData.ownerEmail.toLowerCase().trim(),
       category: formData.category,
       rating: 5.0,
       distance: '0.0 km',
@@ -74,7 +74,7 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
       <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-scaleIn my-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-black text-gray-800 italic tracking-tighter">Seja um Parceiro Pira</h2>
-          <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender em Pirapemas agora mesmo</p>
+          <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender agora</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,18 +121,15 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <p className="text-[9px] text-gray-400 font-medium italic">Capture a fachada ou o logo da sua loja.</p>
                </div>
             </div>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-4">
             <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Configuração Financeira</p>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500">Chave Pix</label>
-                <input type="text" value={formData.pixKey} onChange={e => setFormData({...formData, pixKey: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="CPF/Email/Telefone" />
-              </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500">Chave Pix</label>
+              <input type="text" value={formData.pixKey} onChange={e => setFormData({...formData, pixKey: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none" placeholder="CPF/Email/Telefone" />
             </div>
           </div>
 
