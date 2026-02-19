@@ -12,12 +12,12 @@ import SellerRegistration from './components/SellerRegistration.tsx';
 import OrderTracking from './components/OrderTracking.tsx';
 import CustomerRegistration from './components/CustomerRegistration.tsx';
 import LandingPage from './components/LandingPage.tsx';
-import DownloadModal from './components/DownloadModal.tsx';
 import RegisterView from './components/RegisterView.tsx';
 import DevAdminView from './components/DevAdminView.tsx';
-import { View, Restaurant, FoodItem, CartItem, Order, UserRole, PaymentMethod, CustomerInfo, Review } from './services/types.ts';
+import DownloadModal from './components/DownloadModal.tsx';
+import { View, Restaurant, FoodItem, CartItem, Order, UserRole, PaymentMethod, CustomerInfo } from './services/types.ts';
 import { MOCK_RESTAURANTS } from './constants.tsx';
-import { db, isDbInitialized, collection, doc, setDoc, updateDoc, onSnapshot, query, where, orderBy, addDoc } from './services/firebase.ts';
+import { supabase, isSupabaseConfigured } from './services/supabase.ts';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<UserRole>(() => localStorage.getItem('pira_session_role') as UserRole || null);
@@ -43,59 +43,64 @@ const App: React.FC = () => {
   const [showCustomerRegister, setShowCustomerRegister] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [dbAvailable, setDbAvailable] = useState(isDbInitialized);
 
-  // 1. Ouvinte Global de Restaurantes
+  // 1. Carregar Restaurantes (Supabase)
   useEffect(() => {
-    if (!isDbInitialized || !db) {
-      setRestaurants(MOCK_RESTAURANTS);
-      setIsLoading(false);
-      setDbAvailable(false);
-      return;
-    }
-
-    try {
-      const unsub = onSnapshot(collection(db, "restaurants"), (snapshot) => {
-        const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Restaurant));
-        setRestaurants(list.length > 0 ? list : MOCK_RESTAURANTS);
-        setIsLoading(false);
-        setDbAvailable(true);
-      }, (err) => {
-        console.warn("Firestore não acessível ou sem permissão. Usando dados locais.");
+    const loadRestaurants = async () => {
+      if (!isSupabaseConfigured || !supabase) {
         setRestaurants(MOCK_RESTAURANTS);
         setIsLoading(false);
-        setDbAvailable(false);
-      });
-      return () => unsub();
-    } catch (e) {
-      console.error("Erro ao inicializar listener de restaurantes:", e);
-      setRestaurants(MOCK_RESTAURANTS);
+        return;
+      }
+
+      const { data, error } = await supabase.from('restaurants').select('*');
+      if (data) setRestaurants(data.length > 0 ? data : MOCK_RESTAURANTS);
+      else setRestaurants(MOCK_RESTAURANTS);
+      
       setIsLoading(false);
-      setDbAvailable(false);
-    }
+
+      // Inscrição Realtime para atualizações de restaurantes
+      const subscription = supabase
+        .channel('restaurants_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'restaurants' }, () => {
+          loadRestaurants(); // Recarregar em caso de mudança
+        })
+        .subscribe();
+
+      return () => { supabase.removeChannel(subscription); };
+    };
+
+    loadRestaurants();
   }, []);
 
-  // 2. Ouvinte de Pedidos em Tempo Real
+  // 2. Ouvinte de Pedidos Realtime (Supabase)
   useEffect(() => {
-    if (!role || !dbAvailable || !db) return;
-    let q;
-    try {
+    if (!role || !isSupabaseConfigured || !supabase) return;
+
+    const fetchOrders = async () => {
+      let query = supabase.from('orders').select('*').order('timestamp', { ascending: false });
+      
       if (role === 'seller' && activeRestaurantId) {
-        q = query(collection(db, "orders"), where("restaurantId", "==", activeRestaurantId), orderBy("timestamp", "desc"));
+        query = query.eq('restaurantId', activeRestaurantId);
       } else if (role === 'customer' && customerInfo) {
-        q = query(collection(db, "orders"), where("customerInfo.email", "==", customerInfo.email.toLowerCase()), orderBy("timestamp", "desc"));
+        query = query.eq('customerInfo->>email', customerInfo.email.toLowerCase());
       } else return;
 
-      const unsub = onSnapshot(q, (snap) => {
-        setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() } as Order)));
-      }, (err) => {
-        console.warn("Erro no listener de pedidos (pode faltar índice ou chaves):", err);
-      });
-      return () => unsub();
-    } catch (e) {
-      console.error("Falha ao criar query de pedidos:", e);
-    }
-  }, [role, activeRestaurantId, customerInfo, dbAvailable]);
+      const { data } = await query;
+      if (data) setOrders(data as Order[]);
+    };
+
+    fetchOrders();
+
+    const orderSub = supabase
+      .channel('orders_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        fetchOrders();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(orderSub); };
+  }, [role, activeRestaurantId, customerInfo]);
 
   // Persistência Local
   useEffect(() => {
@@ -112,23 +117,20 @@ const App: React.FC = () => {
   };
 
   const handleSaveCustomerInfo = async (info: CustomerInfo) => {
-    try {
-      if (dbAvailable && db) {
-        const docId = info.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        await setDoc(doc(db, "customers", docId), info);
-      }
-      setCustomerInfo(info);
-      setRole('customer');
-      setHasEntered(true);
-      setShowCustomerRegister(false);
-      setCurrentView('home');
-    } catch (e) {
-      alert("Salvando perfil apenas localmente devido a falha no banco.");
-      setCustomerInfo(info);
-      setRole('customer');
-      setHasEntered(true);
-      setShowCustomerRegister(false);
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('customers').upsert({
+        email: info.email.toLowerCase(),
+        name: info.name,
+        phone: info.phone,
+        address: info.address,
+        pin: info.pin
+      });
     }
+    setCustomerInfo(info);
+    setRole('customer');
+    setHasEntered(true);
+    setShowCustomerRegister(false);
+    setCurrentView('home');
   };
 
   const handleCheckout = async (method: PaymentMethod, details?: string, deliveryFee: number = 0) => {
@@ -145,57 +147,52 @@ const App: React.FC = () => {
     
     const newOrder = {
       restaurantId: firstItem.restaurantId,
+      restaurantName: firstItem.restaurantName,
       date: now.toLocaleDateString('pt-BR'),
       timestamp: now.getTime(),
-      restaurantName: firstItem.restaurantName,
       total: cart.reduce((acc, i) => acc + (i.price * i.quantity), 0) + deliveryFee,
-      items: [...cart],
-      status: 'pending' as const,
+      items: cart,
+      status: 'pending',
       paymentMethod: method,
       paymentDetails: details || "",
       customerInfo: customerInfo
     };
 
     try {
-      if (dbAvailable && db) {
-        await addDoc(collection(db, "orders"), newOrder);
-      } else {
-        throw new Error("DB Offline");
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.from('orders').insert(newOrder);
+        if (error) throw error;
       }
       setCart([]);
       setIsCartOpen(false);
       setCurrentView('orders');
     } catch (e) {
       console.error("Erro ao salvar pedido:", e);
-      alert("Não foi possível enviar o pedido ao banco. Certifique-se de que o Firebase está configurado corretamente.");
+      alert("Erro ao enviar pedido. Verifique sua conexão.");
     } finally {
       setIsSubmittingOrder(false);
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
-    try {
-      if (dbAvailable && db) {
-        await updateDoc(doc(db, "orders", orderId), { status });
-      }
-    } catch (e) {
-      console.error("Erro ao atualizar pedido:", e);
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from('orders').update({ status }).eq('id', orderId);
     }
   };
 
   const handleSellerRegister = async (newRes: Restaurant) => {
-    try {
-      if (dbAvailable && db) {
-        await setDoc(doc(db, "restaurants", newRes.id), { ...newRes, isOpen: true });
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.from('restaurants').insert(newRes);
+      if (error) {
+        alert("Erro no cadastro: " + error.message);
+        return;
       }
-      setActiveRestaurantId(newRes.id);
-      setRole('seller');
-      setHasEntered(true);
-      setShowSellerRegister(false);
-      setCurrentView('seller-dashboard');
-    } catch (e) {
-      alert("Erro ao registrar no banco. Tente novamente mais tarde.");
     }
+    setActiveRestaurantId(newRes.id);
+    setRole('seller');
+    setHasEntered(true);
+    setShowSellerRegister(false);
+    setCurrentView('seller-dashboard');
   };
 
   const handleLoginSuccess = (loginRole: 'customer' | 'seller', data: Restaurant | CustomerInfo) => {
@@ -221,7 +218,7 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
         <div className="w-12 h-12 border-4 border-red-100 border-t-red-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-[10px] font-black uppercase text-red-600 tracking-widest">Iniciando Delivery Pira...</p>
+        <p className="mt-4 text-[10px] font-black uppercase text-red-600 tracking-widest">Conectando ao Delivery Pira...</p>
       </div>
     );
   }
@@ -255,10 +252,10 @@ const App: React.FC = () => {
       onLogout={handleLogout}
       onLoginClick={() => setShowLoginModal(true)}
     >
-      {!dbAvailable && (
+      {!isSupabaseConfigured && (
         <div className="bg-amber-500 text-white text-[10px] font-black text-center py-2 uppercase tracking-widest rounded-xl mb-4 animate-fadeIn">
           <i className="fa-solid fa-triangle-exclamation mr-2"></i>
-          Modo Offline: Dados não serão sincronizados com o servidor
+          Modo Demo: Configure o Supabase no README para salvar dados
         </div>
       )}
 

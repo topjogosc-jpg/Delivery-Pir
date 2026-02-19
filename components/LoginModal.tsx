@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Restaurant, CustomerInfo } from '../services/types.ts';
-import { db, collection, query, where, getDocs, limit } from '../services/firebase.ts';
+import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
 
 interface LoginModalProps {
   onLoginSuccess: (role: 'customer' | 'seller', data: Restaurant | CustomerInfo) => void;
@@ -16,49 +16,48 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess, onCancel }) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured || !supabase) {
+      alert("Configuração de banco de dados pendente.");
+      return;
+    }
+
     setIsChecking(true);
     setError(false);
     
     try {
-      // 1. Tenta buscar como Parceiro/Lojista
-      const sellerQuery = query(
-        collection(db, "restaurants"), 
-        where("ownerEmail", "==", email.toLowerCase().trim()), 
-        where("adminPin", "==", pin),
-        limit(1)
-      );
-      const sellerSnapshot = await getDocs(sellerQuery);
+      // 1. Buscar como Parceiro
+      const { data: seller, error: sErr } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('ownerEmail', email.toLowerCase().trim())
+        .eq('adminPin', pin)
+        .maybeSingle();
       
-      if (!sellerSnapshot.empty) {
-        const sellerData = { id: sellerSnapshot.docs[0].id, ...sellerSnapshot.docs[0].data() } as Restaurant;
-        onLoginSuccess('seller', sellerData);
+      if (seller) {
+        onLoginSuccess('seller', seller as Restaurant);
         setIsChecking(false);
         return;
       }
 
-      // 2. Tenta buscar como Cliente
-      const customerQuery = query(
-        collection(db, "customers"), 
-        where("email", "==", email.toLowerCase().trim()), 
-        where("pin", "==", pin),
-        limit(1)
-      );
-      const customerSnapshot = await getDocs(customerQuery);
+      // 2. Buscar como Cliente
+      const { data: customer, error: cErr } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('email', email.toLowerCase().trim())
+        .eq('pin', pin)
+        .maybeSingle();
 
-      if (!customerSnapshot.empty) {
-        const customerData = customerSnapshot.docs[0].data() as CustomerInfo;
-        onLoginSuccess('customer', customerData);
+      if (customer) {
+        onLoginSuccess('customer', customer as CustomerInfo);
         setIsChecking(false);
         return;
       }
 
-      // Se chegou aqui, não encontrou nada
       setError(true);
       setPin('');
       setTimeout(() => setError(false), 3000);
     } catch (err) {
       console.error("Erro ao fazer login:", err);
-      alert("Erro de conexão. Verifique sua internet.");
     } finally {
       setIsChecking(false);
     }

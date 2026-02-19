@@ -1,35 +1,20 @@
 
-# 🚀 Guia de Ativação Online - Delivery Pira
+# 🚀 Configuração Final: Supabase no Delivery Pira
 
-Siga estes passos para que os pedidos apareçam em tempo real no painel do vendedor:
+Para que o app funcione online com Supabase, siga estes passos:
 
-### 1. Configurar o Firestore (Onde os dados ficam)
-1. No [Console do Firebase](https://console.firebase.google.com/), entre no seu projeto.
-2. Clique em **Firestore Database** no menu lateral.
-3. Clique em **Regras (Rules)** no topo.
-4. Substitua o código que estiver lá por este (permite que qualquer um peça sem login complicado no início):
+### 1. Criar as Tabelas (Obrigatório)
+No painel do Supabase, vá em **SQL Editor** e execute o código SQL que forneci acima para criar as tabelas `restaurants`, `customers` e `orders`.
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
-5. Clique em **Publicar**.
+### 2. Ativar o Realtime
+Vá em **Database > Replication**. Clique em **'supabase_realtime'** e marque as tabelas `restaurants` e `orders` para que elas possam enviar atualizações instantâneas.
 
-### 2. Adicionar as Chaves ao App
-No seu painel de hospedagem (Vercel/Netlify), adicione estas chaves com os valores que você pegou no Passo 3 das configurações do projeto:
+### 3. Configurar Variáveis de Ambiente
+Na sua hospedagem (Vercel, Netlify, etc), adicione estas chaves:
 
-- `VITE_FIREBASE_API_KEY`: (Sua API Key)
-- `VITE_FIREBASE_PROJECT_ID`: (Seu Project ID)
-- `VITE_FIREBASE_AUTH_DOMAIN`: (Seu Auth Domain)
-- `VITE_FIREBASE_APP_ID`: (Seu App ID)
+- `VITE_SUPABASE_URL`: (Seu Project URL)
+- `VITE_SUPABASE_ANON_KEY`: (Sua Anon Key)
 
-### 3. Reiniciar o Site
-Depois de salvar as chaves, faça um novo "Deploy" ou apenas atualize a página. Se a faixa amarela **"Modo Offline"** desaparecer, você está ONLINE!
+---
 
-**Delivery Pira - O Delivery Oficial de Pirapemas.**
+**✓ Pronto!** O app agora está usando PostgreSQL com Supabase, permitindo sincronização em tempo real de pedidos e cardápios.

@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Restaurant, FoodItem, PaymentConfig } from '../services/types.ts';
-import { db, doc, updateDoc } from '../services/firebase.ts';
+import React, { useState, useEffect } from 'react';
+import { Restaurant, FoodItem } from '../services/types.ts';
+import { supabase, isSupabaseConfigured } from '../services/supabase.ts';
 
 interface AdminViewProps {
   restaurants: Restaurant[];
@@ -11,22 +11,15 @@ interface AdminViewProps {
 
 const AdminView: React.FC<AdminViewProps> = ({ restaurants, onBack, activeRestaurantId }) => {
   const targetRes = restaurants.find(r => r.id === activeRestaurantId);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const storeLogoInputRef = useRef<HTMLInputElement>(null);
   
-  const [activeTab, setActiveTab] = useState<'menu' | 'payments' | 'settings'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'settings'>('menu');
   const [isSaving, setIsSaving] = useState(false);
-
-  const [payConfig, setPayConfig] = useState<PaymentConfig>({
-    pixKey: '', whatsappPix: '', mercadoPagoToken: '', acceptsCard: true, acceptsCash: true, acceptsPix: false
-  });
 
   const [storeInfo, setStoreInfo] = useState({ name: '', address: '', deliveryFee: '0', image: '' });
   const [newItem, setNewItem] = useState({ name: '', description: '', price: '', category: 'Destaques', image: '' });
 
   useEffect(() => {
     if (targetRes) {
-      if (targetRes.paymentConfig) setPayConfig(targetRes.paymentConfig);
       setStoreInfo({
         name: targetRes.name || '',
         address: targetRes.address || '',
@@ -38,7 +31,7 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, onBack, activeRestau
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetRes || !newItem.name || !newItem.price) return;
+    if (!targetRes || !newItem.name || !newItem.price || !supabase) return;
     setIsSaving(true);
 
     const foodItem: FoodItem = {
@@ -53,39 +46,38 @@ const AdminView: React.FC<AdminViewProps> = ({ restaurants, onBack, activeRestau
 
     try {
       const updatedMenu = [...(targetRes.menu || []), foodItem];
-      await updateDoc(doc(db, "restaurants", activeRestaurantId), { menu: updatedMenu });
+      await supabase.from('restaurants').update({ menu: updatedMenu }).eq('id', activeRestaurantId);
       setNewItem({ name: '', description: '', price: '', category: 'Destaques', image: '' });
-      alert('Produto adicionado!');
     } catch (e) {
-      alert('Erro ao salvar produto no banco.');
+      alert('Erro ao salvar no Supabase.');
     } finally {
       setIsSaving(false);
     }
   };
 
   const toggleAvailability = async (itemId: string) => {
-    if (!targetRes) return;
+    if (!targetRes || !supabase) return;
     const updatedMenu = targetRes.menu.map(item => item.id === itemId ? { ...item, available: !item.available } : item);
-    await updateDoc(doc(db, "restaurants", activeRestaurantId), { menu: updatedMenu });
+    await supabase.from('restaurants').update({ menu: updatedMenu }).eq('id', activeRestaurantId);
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!targetRes || !confirm('Excluir produto?')) return;
+    if (!targetRes || !supabase || !confirm('Excluir produto?')) return;
     const updatedMenu = targetRes.menu.filter(item => item.id !== itemId);
-    await updateDoc(doc(db, "restaurants", activeRestaurantId), { menu: updatedMenu });
+    await supabase.from('restaurants').update({ menu: updatedMenu }).eq('id', activeRestaurantId);
   };
 
   const saveStoreInfo = async () => {
-    if (!targetRes) return;
+    if (!targetRes || !supabase) return;
     setIsSaving(true);
     try {
-      await updateDoc(doc(db, "restaurants", activeRestaurantId), {
+      await supabase.from('restaurants').update({
         name: storeInfo.name,
         address: storeInfo.address,
         deliveryFee: parseFloat(storeInfo.deliveryFee) || 0,
         image: storeInfo.image
-      });
-      alert('Informações atualizadas!');
+      }).eq('id', activeRestaurantId);
+      alert('Atualizado!');
     } finally {
       setIsSaving(false);
     }
