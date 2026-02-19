@@ -1,28 +1,27 @@
 
-# 🚀 Delivery Pira Online em 5 Minutos
+# 🚀 Delivery Pira - Configuração de Banco de Dados
 
-Siga este guia se você não tem experiência com servidores:
+Para o aplicativo funcionar em todos os celulares salvando os dados, você deve configurar o Firebase:
 
-### 1. Colocar no GitHub (O jeito fácil)
-1. Vá no seu [GitHub](https://github.com) e crie um novo repositório chamado `delivery-pira`.
-2. No meio da tela, clique em **"uploading an existing file"**.
-3. Selecione **TODOS** os arquivos desta pasta e arraste para o navegador.
-4. Espere carregar e clique no botão verde **"Commit changes"**.
+### 1. Criar o Projeto no Firebase
+1. Acesse [console.firebase.google.com](https://console.firebase.google.com/).
+2. Clique em **"Adicionar Projeto"** e dê o nome de `Delivery Pira`.
+3. No menu lateral, vá em **Build > Firestore Database** e clique em **"Criar Banco de Dados"**.
+4. Escolha **"Iniciar no modo de teste"** (para que todos possam ler/escrever inicialmente) e escolha a região mais próxima (ex: `southamerica-east1`).
 
-### 2. Ligar o site na Vercel
-1. Entre no [Vercel.com](https://vercel.com) com seu GitHub.
-2. Clique em **"Add New"** > **"Project"**.
-3. Clique em **"Import"** no projeto `delivery-pira`.
-4. Antes de clicar em Deploy, abra a aba **"Environment Variables"**:
-   - Name: `API_KEY`
-   - Value: (Cole aqui sua chave do Google Gemini)
-5. Clique em **"Deploy"**.
+### 2. Obter as Chaves
+1. Vá na engrenagem ⚙️ (Configurações do Projeto).
+2. Na aba **"Geral"**, role até o fim e clique no ícone `< >` (Web App).
+3. Registre o app como `Delivery Pira Web`.
+4. Copie os valores do objeto `firebaseConfig`.
 
-### 3. Como acessar no Celular
-Assim que a Vercel terminar, ela te dará um link (ex: `delivery-pira.vercel.app`).
-1. Abra esse link no celular.
-2. Vá nas opções do navegador e clique em **"Instalar Aplicativo"**.
-3. Pronto! Agora você tem um ícone do Delivery Pira na sua tela inicial.
+### 3. Configurar na Vercel
+No painel da Vercel, adicione as seguintes variáveis de ambiente:
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
 
----
-**Dica de Ouro:** Se o site der erro "404", verifique se o arquivo `index.html` está realmente na pasta principal do seu GitHub.
+Pronto! Agora seu app está "vivo" e os pedidos serão salvos nas nuvens.
