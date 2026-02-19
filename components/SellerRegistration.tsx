@@ -9,8 +9,6 @@ interface SellerRegistrationProps {
 
 const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onCancel }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [protocolInput, setProtocolInput] = useState('');
-  const [protocolError, setProtocolError] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -25,10 +23,6 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
     deliveryFee: '0'
   });
 
-  const whatsappNumber = "5519991759068";
-  // O protocolo exato exigido
-  const protocolRequired = "0382690@";
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -42,14 +36,6 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validação com trim() para evitar erros de espaços acidentais
-    if (protocolInput.trim() !== protocolRequired) {
-      setProtocolError(true);
-      alert('Protocolo de Ativação incorreto. Verifique o código enviado pelo desenvolvedor (certifique-se de incluir o caractere @ no final).');
-      setTimeout(() => setProtocolError(false), 2000);
-      return;
-    }
 
     if (formData.pin.length !== 4) {
       alert('O PIN deve ter exatamente 4 dígitos.');
@@ -86,53 +72,12 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
       <div className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-scaleIn my-8">
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <h2 className="text-2xl font-black text-gray-800 italic tracking-tighter">Seja um Parceiro Pira</h2>
-          <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender em Pirapemas</p>
-        </div>
-
-        {/* Aviso de Protocolo Requerido */}
-        <div className="mb-6 bg-red-50 border border-red-100 p-5 rounded-2xl space-y-3 animate-fadeIn">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center shrink-0">
-              <i className="fa-solid fa-shield-halved text-lg"></i>
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-red-800 uppercase tracking-widest">Cadastro Restrito</p>
-              <p className="text-[11px] text-red-700 font-medium leading-tight">
-                O acesso para novos parceiros é limitado. Você precisa inserir o <strong>Protocolo de Ativação</strong> oficial para prosseguir.
-              </p>
-            </div>
-          </div>
-          <a 
-            href={`https://wa.me/${whatsappNumber}?text=Olá! Gostaria de solicitar o Protocolo de Ativação para cadastrar minha loja no Delivery Pira.`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-green-500 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-green-200"
-          >
-            <i className="fa-brands fa-whatsapp text-sm"></i>
-            Solicitar Protocolo via WhatsApp
-          </a>
+          <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender em Pirapemas agora mesmo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className={`text-[10px] font-black uppercase tracking-widest ml-1 transition-colors ${protocolError ? 'text-red-600' : 'text-red-500'}`}>
-              Inserir Protocolo de Ativação
-            </label>
-            <input 
-              required 
-              type="text" 
-              value={protocolInput} 
-              onChange={e => {
-                setProtocolInput(e.target.value);
-                if(protocolError) setProtocolError(false);
-              }} 
-              className={`w-full bg-red-50/30 border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 font-black text-center tracking-widest transition-all ${protocolError ? 'border-red-500 ring-red-500/20 animate-shake' : 'border-red-100 focus:ring-red-500/10'}`} 
-              placeholder="Digite o código de segurança..." 
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seu Nome</label>
