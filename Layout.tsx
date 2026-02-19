@@ -24,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setView, cartCoun
             <div className="w-8 h-8 bg-[#EA1D2C] rounded-lg flex items-center justify-center text-white shadow-lg shadow-red-100">
                <i className="fa-solid fa-motorcycle text-xs"></i>
             </div>
-            <h1 className="text-xl font-black text-[#EA1D2C] italic tracking-tighter">Pira Certo</h1>
+            <h1 className="text-xl font-black text-[#EA1D2C] italic tracking-tighter">Delivery Pira</h1>
           </div>
           
           {role === 'customer' && (
@@ -111,7 +111,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeView, setView, cartCoun
       </main>
 
       {/* Mobile Bottom Nav */}
-      {/* Fix: Added type assertion to activeView to resolve the reported unintentional comparison error */}
       {(role === 'customer' || !role) && (activeView as string) !== 'register' && (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-3 flex justify-between items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.03)]">
           <button 

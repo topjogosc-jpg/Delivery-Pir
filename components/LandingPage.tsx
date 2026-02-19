@@ -12,7 +12,7 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsPartner, onRegisterPartner, onDownloadClick, onEnterDevRoot }) => {
   const [copied, setCopied] = useState(false);
   const whatsappNumber = "5519991759068";
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá! Gostaria de suporte sobre o Delivery Pira Certo.`;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá! Gostaria de suporte sobre o Delivery Pira.`;
   const devEmail = "deliverypirapemas@gmail.com";
   
   const getAppUrl = () => {
@@ -21,12 +21,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
     } catch {
       return window.location.href;
     }
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(getAppUrl());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -43,8 +37,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
               <i className="fa-solid fa-motorcycle text-xl"></i>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-2xl font-black text-gray-900 italic tracking-tighter leading-none">Pira Certo</h1>
-              <span className="text-[9px] font-black uppercase text-red-500 tracking-[0.2em]">Delivery Oficial</span>
+              <h1 className="text-2xl font-black text-gray-900 italic tracking-tighter leading-none">Delivery Pira</h1>
+              <span className="text-[9px] font-black uppercase text-red-500 tracking-[0.2em]">Pirapemas Delivery</span>
             </div>
           </div>
           
@@ -70,17 +64,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Suporte 24h Disponível</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Suporte Ativo em Pirapemas</span>
           </div>
 
           <h2 className="text-6xl md:text-8xl font-black text-gray-900 leading-[0.9] tracking-tighter italic max-w-4xl animate-slideIn">
-            Fome de <br/>
-            <span className="bg-gradient-to-r from-[#EA1D2C] to-orange-500 bg-clip-text text-transparent">Qualidade?</span>
+            O Melhor de Pirapemas <br/>
+            <span className="bg-gradient-to-r from-[#EA1D2C] to-orange-500 bg-clip-text text-transparent">Na sua mão.</span>
           </h2>
 
           <p className="text-lg md:text-xl text-gray-500 max-w-2xl leading-relaxed font-medium animate-fadeIn">
-            O aplicativo de delivery que mais cresce em Pirapemas. <br/>
-            Segurança total, rapidez e as melhores opções na palma da sua mão.
+            O aplicativo de delivery oficial de Pirapemas. <br/>
+            Lanches, pizzas, pratos e muito mais com entrega rápida e segura.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center animate-slideIn">
@@ -103,83 +97,58 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCustomer, onEnterAsP
         </div>
       </section>
 
-      {/* Dev & Support Section (New) */}
+      {/* Support Section */}
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Developer Card */}
-            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left transition-transform hover:scale-[1.01]">
+            <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
               <div className="w-24 h-24 bg-gray-900 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shrink-0">
                 <i className="fa-solid fa-code text-4xl"></i>
               </div>
               <div className="space-y-4">
                 <div>
                   <h3 className="text-2xl font-black text-gray-900">Desenvolvimento</h3>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mt-1">Pira Certo Team</p>
+                  <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mt-1">Delivery Pira Team</p>
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-center md:justify-start gap-3 text-gray-600 group">
                     <i className="fa-solid fa-envelope text-red-500"></i>
                     <a href={`mailto:${devEmail}`} className="font-bold text-sm hover:text-red-500 transition-colors">{devEmail}</a>
                   </div>
-                  <div className="flex items-center justify-center md:justify-start gap-3 text-gray-600">
-                    <i className="fa-solid fa-globe text-red-500"></i>
-                    <span className="font-bold text-sm">Pirapemas - MA</span>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Support Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-black p-10 rounded-[3rem] shadow-2xl flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left transition-transform hover:scale-[1.01] text-white">
+            <div className="bg-gradient-to-br from-gray-900 to-black p-10 rounded-[3rem] shadow-2xl flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left text-white">
               <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-green-500/20 shrink-0">
                 <i className="fa-brands fa-whatsapp text-4xl"></i>
               </div>
               <div className="space-y-4 flex-1">
                 <div className="flex items-center justify-center md:justify-start gap-3">
-                  <h3 className="text-2xl font-black italic tracking-tight">Suporte 24 Horas</h3>
+                  <h3 className="text-2xl font-black italic tracking-tight">Suporte Pirapemas</h3>
                   <span className="bg-green-500 text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse">ON</span>
                 </div>
-                <p className="text-sm text-gray-400 font-medium">Fale conosco agora mesmo para dúvidas, reclamações ou parcerias.</p>
-                <div className="flex flex-col gap-3">
-                  <a 
-                    href={whatsappUrl} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center md:justify-start gap-2 bg-green-500 text-white px-6 py-3 rounded-2xl font-black text-sm hover:bg-green-600 transition-all active:scale-95"
-                  >
-                    <i className="fa-brands fa-whatsapp text-xl"></i>
-                    (19) 99175-9068
-                  </a>
-                </div>
+                <p className="text-sm text-gray-400 font-medium">Tem alguma dúvida ou quer cadastrar sua loja? Fale conosco agora!</p>
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center md:justify-start gap-2 bg-green-500 text-white px-6 py-3 rounded-2xl font-black text-sm hover:bg-green-600 transition-all">
+                  <i className="fa-brands fa-whatsapp text-xl"></i>
+                  (19) 99175-9068
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* WhatsApp Floating Button */}
-      <a 
-        href={whatsappUrl} 
-        target="_blank" 
-        rel="noreferrer"
-        className="fixed bottom-8 right-8 z-[300] group"
-      >
-        <div className="absolute -top-12 right-0 bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black shadow-xl border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-           Suporte 24h Online! <span className="text-green-500 ml-1">●</span>
-        </div>
-        <div className="bg-green-500 text-white w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-green-200 hover:scale-110 hover:-rotate-6 transition-all active:scale-95">
+      {/* Floating Support */}
+      <a href={whatsappUrl} target="_blank" rel="noreferrer" className="fixed bottom-8 right-8 z-[300] group">
+        <div className="bg-green-500 text-white w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-2xl hover:scale-110 transition-all">
           <i className="fa-brands fa-whatsapp text-4xl"></i>
         </div>
       </a>
 
-      {/* Minimal Footer with Hidden Dev Trigger */}
       <footer className="py-12 px-6 border-t border-gray-50 text-center">
-        <p 
-          className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] cursor-default"
-          onClick={onEnterDevRoot}
-        >
-          &copy; {new Date().getFullYear()} Delivery Pira Certo • Todos os direitos reservados
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em]" onClick={onEnterDevRoot}>
+          &copy; {new Date().getFullYear()} Delivery Pira • Pirapemas - MA
         </p>
       </footer>
     </div>

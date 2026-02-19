@@ -1,6 +1,6 @@
 {
-  "name": "Delivery PIRAPEMAS ",
-  "description": "Uma plataforma completa de delivery inspirada no iFood, com busca inteligente por IA, categorias de comida e checkout simplificado.",
+  "name": "Delivery Pira",
+  "description": "Plataforma completa de delivery em Pirapemas. Peça comida, lanches e bebidas com facilidade e rapidez.",
   "requestFramePermissions": [
     "geolocation",
     "camera"
