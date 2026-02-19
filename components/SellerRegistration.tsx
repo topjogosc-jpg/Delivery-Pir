@@ -10,6 +10,7 @@ interface SellerRegistrationProps {
 const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onCancel }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [protocolInput, setProtocolInput] = useState('');
+  const [protocolError, setProtocolError] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -25,6 +26,7 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
   });
 
   const whatsappNumber = "5519991759068";
+  // O protocolo exato exigido
   const protocolRequired = "0382690@";
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +43,11 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (protocolInput !== protocolRequired) {
-      alert('Protocolo de Ativação incorreto. Solicite o código válido com o desenvolvedor via WhatsApp.');
+    // Validação com trim() para evitar erros de espaços acidentais
+    if (protocolInput.trim() !== protocolRequired) {
+      setProtocolError(true);
+      alert('Protocolo de Ativação incorreto. Verifique o código enviado pelo desenvolvedor (certifique-se de incluir o caractere @ no final).');
+      setTimeout(() => setProtocolError(false), 2000);
       return;
     }
 
@@ -86,7 +91,7 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
           <p className="text-sm text-gray-500">Cadastre sua empresa e comece a vender em Pirapemas</p>
         </div>
 
-        {/* Aviso de Protocolo Requerido - Código Oculto */}
+        {/* Aviso de Protocolo Requerido */}
         <div className="mb-6 bg-red-50 border border-red-100 p-5 rounded-2xl space-y-3 animate-fadeIn">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center shrink-0">
@@ -112,13 +117,18 @@ const SellerRegistration: React.FC<SellerRegistrationProps> = ({ onRegister, onC
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-black text-red-500 uppercase tracking-widest ml-1">Inserir Protocolo de Ativação</label>
+            <label className={`text-[10px] font-black uppercase tracking-widest ml-1 transition-colors ${protocolError ? 'text-red-600' : 'text-red-500'}`}>
+              Inserir Protocolo de Ativação
+            </label>
             <input 
               required 
               type="text" 
               value={protocolInput} 
-              onChange={e => setProtocolInput(e.target.value)} 
-              className="w-full bg-red-50/30 border border-red-100 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/10 font-black text-center tracking-widest" 
+              onChange={e => {
+                setProtocolInput(e.target.value);
+                if(protocolError) setProtocolError(false);
+              }} 
+              className={`w-full bg-red-50/30 border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 font-black text-center tracking-widest transition-all ${protocolError ? 'border-red-500 ring-red-500/20 animate-shake' : 'border-red-100 focus:ring-red-500/10'}`} 
               placeholder="Digite o código de segurança..." 
             />
           </div>
